@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://himachal-agrorent.onrender.com',
+        target: 'https://himachal-agrorent.onrender.com/',
         changeOrigin: true,
       },
     },

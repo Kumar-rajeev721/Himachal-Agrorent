@@ -35,8 +35,8 @@ export default function AdminCrops() {
                     {crops.map(c => (
                       <tr key={c._id}>
                         <td><div className="fw-semibold">🌾 {c.name}</div>{c.description && <small className="text-muted">{c.description}</small>}</td>
-                        <td>{c.season?.name || 'â€”'}</td>
-                        <td>{c.growthPeriod ? `${c.growthPeriod} days` : 'â€”'}</td>
+                        <td>{c.season?.name || ''}</td>
+                        <td>{c.growthPeriod ? `${c.growthPeriod} days` : ''}</td>
                         <td><span className={`badge ${c.waterRequirement === 'high' ? 'bg-danger' : c.waterRequirement === 'medium' ? 'bg-warning text-dark' : 'bg-success'}`}>{c.waterRequirement}</span></td>
                         <td>{c.addedBy?.name || 'System'}</td>
                         <td><button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(c._id)}>Delete</button></td>
