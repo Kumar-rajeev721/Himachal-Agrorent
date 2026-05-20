@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 // Increase timeout to 30s — Gemini AI can be slow on first call
-const API = axios.create({ baseURL: '/api', timeout: 30000 });
+export default axios.create({
+  baseURL: "https://himachal-agrorent.onrender.com",
+});
+
 const AUTH_STORAGE_KEY = 'himachal_agrorent_user';
 
 const getStoredUser = () => {
