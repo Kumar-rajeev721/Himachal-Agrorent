@@ -31,8 +31,19 @@ export default function LandDetail() {
     season: '',
   });
 
+  const loadLand = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getLand(id);
+      setLand(data);
+    } catch {
+      setLand(null);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    getLand(id).then(r => { setLand(r.data); setLoading(false); }).catch(() => setLoading(false));
+    loadLand();
     getSeasons().then(r => setSeasons(r.data)).catch(() => {});
   }, [id]);
 
@@ -53,6 +64,14 @@ export default function LandDetail() {
     setPaymentLoading(true);
 
     try {
+      const { data: freshLand } = await getLand(id);
+      setLand(freshLand);
+      if (!freshLand.isAvailable) {
+        toast.error('This land is no longer available. Please choose another land.');
+        setPaymentLoading(false);
+        return;
+      }
+
       // Step 1: Load Razorpay script
       const loaded = await loadRazorpayScript();
       if (!loaded) {
@@ -97,6 +116,7 @@ export default function LandDetail() {
             });
 
             if (verifyData.success) {
+              setLand(prev => prev ? { ...prev, isAvailable: false } : prev);
               toast.success('🎉 Payment successful! Booking request sent to farmer.');
               navigate('/my-bookings');
             }
