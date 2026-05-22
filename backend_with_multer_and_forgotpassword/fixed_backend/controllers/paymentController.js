@@ -59,6 +59,7 @@ exports.createOrder = async (req, res) => {
         title: land.title,
         location: land.location,
         pricePerSeason: land.pricePerSeason,
+        googleMapUrl: land.googleMapUrl,
       },
     });
   } catch (err) {
@@ -92,8 +93,12 @@ exports.verifyPayment = async (req, res) => {
       return res.status(400).json({ message: 'Payment verification failed. Invalid signature.' });
     }
 
-    const land = await Land.findById(landId);
-    if (!land) return res.status(404).json({ message: 'Land not found' });
+    const land = await Land.findOneAndUpdate(
+      { _id: landId, isAvailable: true },
+      { isAvailable: false },
+      { new: true }
+    );
+    if (!land) return res.status(400).json({ message: 'Land not available for booking' });
 
     const bookingPayload = {
       land: landId,
@@ -110,7 +115,13 @@ exports.verifyPayment = async (req, res) => {
     };
     if (season) bookingPayload.season = season;
 
-    const booking = await Booking.create(bookingPayload);
+    let booking;
+    try {
+      booking = await Booking.create(bookingPayload);
+    } catch (createErr) {
+      await Land.findByIdAndUpdate(landId, { isAvailable: true });
+      throw createErr;
+    }
 
     // Send payment success email (non-blocking)
     sendPaymentSuccessEmail(req.user, booking, land);

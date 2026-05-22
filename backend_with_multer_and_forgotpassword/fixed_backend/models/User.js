@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { createGoogleMapsUrl } = require('../utils/googleMaps');
 
 const userSchema = new mongoose.Schema(
   {
@@ -15,8 +16,16 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
+
+userSchema.virtual('googleMapUrl').get(function () {
+  return createGoogleMapsUrl(this.address);
+});
 
 // Hash password before save
 userSchema.pre('save', async function (next) {

@@ -11,9 +11,12 @@ const {
 exports.createBooking = async (req, res) => {
   try {
     const { landId, startDate, endDate, userMessage, season } = req.body;
-    const land = await Land.findById(landId);
-    if (!land) return res.status(404).json({ message: 'Land not found' });
-    if (!land.isAvailable) return res.status(400).json({ message: 'Land not available' });
+    const land = await Land.findOneAndUpdate(
+      { _id: landId, isAvailable: true },
+      { isAvailable: false },
+      { new: true }
+    );
+    if (!land) return res.status(400).json({ message: 'Land not available' });
 
     const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
     const totalPrice = (days / 90) * land.pricePerSeason;
@@ -29,7 +32,13 @@ exports.createBooking = async (req, res) => {
     };
     if (season) payload.season = season;
 
-    const booking = await Booking.create(payload);
+    let booking;
+    try {
+      booking = await Booking.create(payload);
+    } catch (createErr) {
+      await Land.findByIdAndUpdate(landId, { isAvailable: true });
+      throw createErr;
+    }
 
     // Send emails (non-blocking)
     const farmer = await User.findById(land.farmer);
@@ -91,9 +100,16 @@ exports.updateBookingStatus = async (req, res) => {
     if (booking.farmer.toString() !== req.user._id.toString() && req.user.role !== 'admin')
       return res.status(403).json({ message: 'Not authorized' });
 
+    const previousStatus = booking.status;
     booking.status = status;
     if (farmerNote) booking.farmerNote = farmerNote;
     await booking.save();
+
+    if (['approved', 'completed'].includes(status)) {
+      await Land.findByIdAndUpdate(booking.land, { isAvailable: false });
+    } else if (['declined', 'cancelled'].includes(status)) {
+      await Land.findByIdAndUpdate(booking.land, { isAvailable: true });
+    }
 
     // Send status update email to user (non-blocking)
     if (status === 'approved' || status === 'declined') {

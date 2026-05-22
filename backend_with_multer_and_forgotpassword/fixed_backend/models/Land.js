@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { createGoogleMapsUrl } = require('../utils/googleMaps');
 
 const landSchema = new mongoose.Schema(
   {
@@ -22,7 +23,15 @@ const landSchema = new mongoose.Schema(
     amenities: [{ type: String }],
     adminNote: { type: String },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
+
+landSchema.virtual('googleMapUrl').get(function () {
+  return createGoogleMapsUrl(this.location);
+});
 
 module.exports = mongoose.model('Land', landSchema);

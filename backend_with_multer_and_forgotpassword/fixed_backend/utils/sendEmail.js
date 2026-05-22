@@ -1,4 +1,11 @@
 const nodemailer = require('nodemailer');
+const { createGoogleMapsUrl } = require('./googleMaps');
+
+const renderLocationWithMapLink = (location) => {
+  if (!location) return 'N/A';
+  const url = createGoogleMapsUrl(location);
+  return url ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${location}</a>` : location;
+};
 
 // ─────────────────────────────────────────────────────────────
 // Create transporter (Gmail — configure in .env)
@@ -108,7 +115,7 @@ const sendBookingConfirmationEmail = (user, booking, land) =>
       <p>Hi <strong>${user.name}</strong>, your booking request has been submitted and is awaiting farmer approval.</p>
       <div class="info-box">
         <p><strong>Land:</strong> ${land.title}</p>
-        <p><strong>Location:</strong> ${land.location}</p>
+        <p><strong>Location:</strong> ${renderLocationWithMapLink(land.location)}</p>
         <p><strong>Start Date:</strong> ${new Date(booking.startDate).toDateString()}</p>
         <p><strong>End Date:</strong> ${new Date(booking.endDate).toDateString()}</p>
         <p><strong>Total Price:</strong> ₹${booking.totalPrice}</p>
@@ -129,6 +136,7 @@ const sendNewBookingAlertToFarmer = (farmer, user, booking, land) =>
       <p>Hi <strong>${farmer.name}</strong>, someone has requested to rent your land.</p>
       <div class="info-box">
         <p><strong>Land:</strong> ${land.title}</p>
+        <p><strong>Location:</strong> ${renderLocationWithMapLink(land.location)}</p>
         <p><strong>Renter:</strong> ${user.name}</p>
         <p><strong>Renter Email:</strong> ${user.email}</p>
         <p><strong>Renter Phone:</strong> ${user.phone || 'N/A'}</p>
@@ -157,7 +165,7 @@ const sendBookingStatusEmail = (user, booking, land, status, farmerNote) => {
       <p>Hi <strong>${user.name}</strong>, the farmer has ${approved ? 'approved' : 'declined'} your booking request.</p>
       <div class="info-box">
         <p><strong>Land:</strong> ${land.title}</p>
-        <p><strong>Location:</strong> ${land.location}</p>
+        <p><strong>Location:</strong> ${renderLocationWithMapLink(land.location)}</p>
         <p><strong>Start Date:</strong> ${new Date(booking.startDate).toDateString()}</p>
         <p><strong>End Date:</strong> ${new Date(booking.endDate).toDateString()}</p>
         <p><strong>Total Price:</strong> ₹${booking.totalPrice}</p>
@@ -186,7 +194,7 @@ const sendPaymentSuccessEmail = (user, booking, land) =>
       <p>Hi <strong>${user.name}</strong>, your payment was successful and your booking is confirmed.</p>
       <div class="info-box">
         <p><strong>Land:</strong> ${land.title}</p>
-        <p><strong>Location:</strong> ${land.location}</p>
+        <p><strong>Location:</strong> ${renderLocationWithMapLink(land.location)}</p>
         <p><strong>Start Date:</strong> ${new Date(booking.startDate).toDateString()}</p>
         <p><strong>End Date:</strong> ${new Date(booking.endDate).toDateString()}</p>
         <p><strong>Amount Paid:</strong> ₹${booking.totalPrice}</p>
