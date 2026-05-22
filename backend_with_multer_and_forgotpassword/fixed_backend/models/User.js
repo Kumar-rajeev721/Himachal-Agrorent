@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { createGoogleMapsUrl } = require('../utils/googleMaps');
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,9 +22,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.virtual('googleMapUrl').get(function () {
-  return createGoogleMapsUrl(this.address);
-});
+// Removed Google Maps helper to avoid external dependency; address remains stored.
 
 // Hash password before save
 userSchema.pre('save', async function (next) {

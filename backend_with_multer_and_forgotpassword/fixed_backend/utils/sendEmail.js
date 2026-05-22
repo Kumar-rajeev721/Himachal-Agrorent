@@ -1,11 +1,6 @@
 const nodemailer = require('nodemailer');
-const { createGoogleMapsUrl } = require('./googleMaps');
-
-const renderLocationWithMapLink = (location) => {
-  if (!location) return 'N/A';
-  const url = createGoogleMapsUrl(location);
-  return url ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${location}</a>` : location;
-};
+// Location rendering: no external map link to avoid missing dependency
+const renderLocationWithMapLink = (location) => (location ? location : 'N/A');
 
 // ─────────────────────────────────────────────────────────────
 // Create transporter (Gmail — configure in .env)
