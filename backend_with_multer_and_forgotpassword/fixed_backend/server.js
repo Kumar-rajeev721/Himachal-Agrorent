@@ -58,7 +58,7 @@ const startServer = async () => {
       return;
     } catch (err) {
       if (err && err.code === 'EADDRINUSE') {
-        console.warn(`Port ${port} in use — trying port ${port + 1}`);
+        // Port in use — try next port silently (no console output)
         port += 1;
         continue;
       }
